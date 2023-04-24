@@ -11,7 +11,7 @@ end
 
 function CorrelationIdHandler:access(conf)
   kong.service.request.set_header("Arul", "123")
-  var xml_string = [[
+  xml_string = [[
 <helo:test>
    <ErrorCode>ESB-00-000</ErrorCode>
    <A>
