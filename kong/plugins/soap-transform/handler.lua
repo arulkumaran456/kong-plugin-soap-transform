@@ -2,6 +2,7 @@ local kong = kong
 local plugin_name = "soap-transform"
 local cjson = require "cjson"
 local CorrelationIdHandler = {}
+local xml2json = {}
 
 CorrelationIdHandler.PRIORITY = 990
 CorrelationIdHandler.VERSION = "0.1"
@@ -11,27 +12,11 @@ end
 
 function CorrelationIdHandler:access(conf)
   kong.service.request.set_header("Arul", "123")
-  local xml_string = [[
-<helo:test>
-   <ErrorCode>ESB-00-000</ErrorCode>
-   <A>
-      <A1>Hello-11-222</A1>
-      <A2>Bandung</A2>
-   </A>
-   <B/>
-   <C>
-     <C1>Satu</C1>
-     <C2>Dua</C2>
-     <C3>Tiga</C3>
-     <C4><C41>Empat-Satu</C41></C4>
-   </C>
-</helo:test>
-]]
-  local output = xml2json.collect(xml_string)
-  kong.service.request.set_header("Jsondata", cjson.encode(output))
+  local res = xml2json.test()
+  kong.service.request.set_header("JSON", res)
 end
 
-local xml2json = {}
+
 function dump(o)
    if type(o) == 'table' then
       local s = '{ '
@@ -113,6 +98,25 @@ function xml2json.collect(s)
   end
 
 end
-
+function xml2json.test()
+  local xml_string = [[
+<helo:test>
+   <ErrorCode>ESB-00-000</ErrorCode>
+   <A>
+      <A1>Hello-11-222</A1>
+      <A2>Bandung</A2>
+   </A>
+   <B/>
+   <C>
+     <C1>Satu</C1>
+     <C2>Dua</C2>
+     <C3>Tiga</C3>
+     <C4><C41>Empat-Satu</C41></C4>
+   </C>
+</helo:test>
+]]
+  local output = xml2json.collect(xml_string)
+  return cjson.encode(output)
+end
 
 return CorrelationIdHandler
