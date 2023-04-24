@@ -13,7 +13,7 @@ end
 function CorrelationIdHandler:access(conf)
   kong.service.request.set_header("Arul", "123")
   local res = xml2json.test()
-  kong.service.request.set_header("JSON", res)
+  kong.response.set_raw_body(res)
 end
 
 
