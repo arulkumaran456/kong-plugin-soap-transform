@@ -11,7 +11,7 @@ end
 
 function CorrelationIdHandler:access(conf)
   kong.service.request.set_header("Arul", "123")
-  xml_string = [[
+  local xml_string = [[
 <helo:test>
    <ErrorCode>ESB-00-000</ErrorCode>
    <A>
@@ -28,7 +28,7 @@ function CorrelationIdHandler:access(conf)
 </helo:test>
 ]]
   local output = xml2json.collect(xml_string)
-  kong.response.set_raw_body(cjson.encode(output))
+  kong.service.request.set_header("Jsondata", cjson.encode(output))
 end
 
 local xml2json = {}
