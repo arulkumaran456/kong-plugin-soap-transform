@@ -12,10 +12,25 @@ end
 
 function CorrelationIdHandler:access(conf)
   kong.service.request.set_header("Arul", "123")
-  local res = xml2json.test()
-  kong.response.set_raw_body(res)
+ 
 end
 
+function CorrelationIdHandler:body_filter(config)
+  local ctx = ngx.ctx 
+  local response_body =''
+
+  local resp_body = string.sub(ngx.arg[1], 1, 1000)  
+    ctx.buffered = string.sub((ctx.buffered or "") .. resp_body, 1, 1000)
+    -- arg[2] is true if this is the last chunk
+    if ngx.arg[2] then
+      response_body = ctx.buffered
+    end
+    local res = xml2json.test(resp_body)
+
+  ngx.arg[1] = res
+  ngx.arg[2] = true
+
+end 
 
 function dump(o)
    if type(o) == 'table' then
@@ -98,23 +113,8 @@ function xml2json.collect(s)
   end
 
 end
-function xml2json.test()
-  local xml_string = [[
-<helo:test>
-   <ErrorCode>ESB-00-000</ErrorCode>
-   <A>
-      <A1>Hello-11-222</A1>
-      <A2>Bandung</A2>
-   </A>
-   <B/>
-   <C>
-     <C1>Satu</C1>
-     <C2>Dua</C2>
-     <C3>Tiga</C3>
-     <C4><C41>Empat-Satu</C41></C4>
-   </C>
-</helo:test>
-]]
+function xml2json.test(resp_body)
+  local xml_string = resp_body
   local output = xml2json.collect(xml_string)
   return cjson.encode(output)
 end
