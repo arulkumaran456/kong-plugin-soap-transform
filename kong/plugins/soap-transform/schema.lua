@@ -1,28 +1,22 @@
 local typedefs = require "kong.db.schema.typedefs"
-
-
 local PLUGIN_NAME = "soap-transform"
-
-
 local schema = {
   name = PLUGIN_NAME,
   fields = {
-    -- the 'fields' array is the top-level entry with fields defined by Kong
-    { consumer = typedefs.no_consumer },  -- this plugin cannot be configured on a consumer (typical for auth plugins)
+    { consumer = typedefs.no_consumer },
     { protocols = typedefs.protocols_http },
     { config = {
-        -- The 'config' record is the custom part of the plugin schema
         type = "record",
         fields = {
-          -- a standard defined field (typedef), with some customizations
-          ignore_content_type = {type = "boolean", default = false},
+          { ignore_content_type = typedefs.header_name {
+              required = false,
+              type = "boolean",
+              default = false } },
         },
-        entity_checks = {
-        
+        entity_checks = { 
         },
       },
     },
   },
 }
-
 return schema
