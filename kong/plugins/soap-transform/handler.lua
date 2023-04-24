@@ -1,103 +1,53 @@
--- If you're not sure your plugin is executing, uncomment the line below and restart Kong
--- then it will throw an error which indicates the plugin is being loaded at least.
+-- Grab pluginname from module name
+local plugin_name = "soap-transform"
+local cjson = require "cjson"
+local table_concat = table.concat
+local xml2lua = require("xml2lua")
+local handler = require("xmlhandler.tree")
+local parser = xml2lua.parser(handler)
 
---assert(ngx.get_phase() == "timer", "The world is coming to an end!")
+-- load the base plugin object and create a subclass
+local xml_json_transformer = require("kong.plugins.base_plugin"):extend()
 
----------------------------------------------------------------------------------------------
--- In the code below, just remove the opening brackets; `[[` to enable a specific handler
---
--- The handlers are based on the OpenResty handlers, see the OpenResty docs for details
--- on when exactly they are invoked and what limitations each handler has.
----------------------------------------------------------------------------------------------
+-- constructor
+function xml_json_transformer:new()
+  xml_json_transformer.super.new(self, plugin_name)
+end
 
+function xml_json_transformer:header_filter(conf)
+  xml_json_transformer.super.header_filter(self)
 
+  --ngx.header["content-encoding"] = "none"
+  ngx.header["content-type"] = "application/json"
+  ngx.header["content-length"] = nil
 
-local plugin = {
-  PRIORITY = 1000, -- set the plugin priority, which determines plugin execution order
-  VERSION = "0.1.0", -- version in X.Y.Z format. Check hybrid-mode compatibility requirements.
-}
+end
 
+---[[ runs in the 'access_by_lua_block'
+function xml_json_transformer:body_filter(config)
+  xml_json_transformer.super.body_filter(self)
+  
+ 
+  local ctx = ngx.ctx 
+  local response_body =''
 
+  local resp_body = string.sub(ngx.arg[1], 1, 1000)  
+    ctx.buffered = string.sub((ctx.buffered or "") .. resp_body, 1, 1000)
+    -- arg[2] is true if this is the last chunk
+    if ngx.arg[2] then
+      response_body = ctx.buffered
+    end
+  parser:parse(resp_body)
 
--- do initialization here, any module level code runs in the 'init_by_lua_block',
--- before worker processes are forked. So anything you add here will run once,
--- but be available in all workers.
+  local xml = handler.root
+  json_text = cjson.encode(xml)
+  ngx.arg[1] = json_text
+  ngx.arg[2] = true
 
+end 
 
-
--- handles more initialization, but AFTER the worker process has been forked/created.
--- It runs in the 'init_worker_by_lua_block'
-function plugin:init_worker()
-
-  -- your custom code here
-  kong.log.debug("saying hi from the 'init_worker' handler")
-
-end --]]
-
-
-
---[[ runs in the 'ssl_certificate_by_lua_block'
--- IMPORTANT: during the `certificate` phase neither `route`, `service`, nor `consumer`
--- will have been identified, hence this handler will only be executed if the plugin is
--- configured as a global plugin!
-function plugin:certificate(plugin_conf)
-
-  -- your custom code here
-  kong.log.debug("saying hi from the 'certificate' handler")
-
-end --]]
-
-
-
---[[ runs in the 'rewrite_by_lua_block'
--- IMPORTANT: during the `rewrite` phase neither `route`, `service`, nor `consumer`
--- will have been identified, hence this handler will only be executed if the plugin is
--- configured as a global plugin!
-function plugin:rewrite(plugin_conf)
-
-  -- your custom code here
-  kong.log.debug("saying hi from the 'rewrite' handler")
-
-end --]]
-
-
-
--- runs in the 'access_by_lua_block'
-function plugin:access(plugin_conf)
-
-  -- your custom code here
-  kong.log.inspect(plugin_conf)   -- check the logs for a pretty-printed config!
-  kong.service.request.set_header(plugin_conf.request_header, "this is on a request")
-
-end --]]
-
-
--- runs in the 'header_filter_by_lua_block'
-function plugin:header_filter(plugin_conf)
-
-  -- your custom code here, for example;
-  kong.response.set_header(plugin_conf.response_header, "this is on the response")
-
-end --]]
-
-
---[[ runs in the 'body_filter_by_lua_block'
-function plugin:body_filter(plugin_conf)
-
-  -- your custom code here
-  kong.log.debug("saying hi from the 'body_filter' handler")
-
-end --]]
-
-
---[[ runs in the 'log_by_lua_block'
-function plugin:log(plugin_conf)
-
-  -- your custom code here
-  kong.log.debug("saying hi from the 'log' handler")
-
-end --]]
-
+-- set the plugin priority, which determines plugin execution order
+xml_json_transformer.PRIORITY = 990
 
 -- return our plugin object
-return plugin
+return xml_json_transformer
