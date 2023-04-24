@@ -4,6 +4,7 @@ local cjson = require "cjson"
 local CorrelationIdHandler = {}
 
 CorrelationIdHandler.PRIORITY = 990
+CorrelationIdHandler.VERSION = "0.1"
 function CorrelationIdHandler:init_worker()
 end
 
