@@ -15,7 +15,7 @@ function xml_json_transformer:access(plugin_conf)
 end
 
 function xml_json_transformer:header_filter(plugin_conf)
-  kong.response.set_header(plugin_conf.response_header, "this is on the response arulkumar")
+  kong.response.set_header(plugin_conf.response_header, "this is on the response")
 end
 
 xml_json_transformer.PRIORITY = 990
