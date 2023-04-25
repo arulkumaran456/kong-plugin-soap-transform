@@ -11,7 +11,7 @@ function CorrelationIdHandler:init_worker()
 end
 
 function CorrelationIdHandler:body_filter(config)
-  kong.response.set_header("Shivya", config)
+ 
 end 
 
 function CorrelationIdHandler:access(conf)
