@@ -6,24 +6,24 @@ local xml2json = {}
 
 CorrelationIdHandler.PRIORITY = 990
 CorrelationIdHandler.VERSION = "0.1"
+
 function CorrelationIdHandler:init_worker()
 end
 
+function CorrelationIdHandler:body_filter(config)
+    
+end 
 
 function CorrelationIdHandler:access(conf)
-  kong.service.request.set_header("Arul", "123")
- 
+  local body = kong.response.get_raw_body()
+  local json_body, err = xml2json.test(body)
+  if err then
+    kong.log.warn("body transform failed: " .. err)
+    return
+  end
+  kong.response.set_header("Arulkumar", json_body)
+  return kong.response.set_raw_body(json_body)
 end
-
-function CorrelationIdHandler:body_filter(config)
-    local body = kong.response.get_raw_body()
-    local json_body, err = xml2json.test(body)
-    if err then
-      kong.log.warn("body transform failed: " .. err)
-      return
-    end
-    return kong.response.set_raw_body(json_body)
-end 
 
 function dump(o)
    if type(o) == 'table' then
