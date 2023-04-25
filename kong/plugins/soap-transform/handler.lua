@@ -16,8 +16,8 @@ end
 
 function CorrelationIdHandler:access(conf)
   local body = kong.response.get_raw_body()
-  local json_body = xml2json.test(body)
-  kong.response.set_header("Arulkumar", json_body)
+  --local json_body = xml2json.test(body)
+  kong.response.set_header("Arulkumar", body)
   kong.response.set_header("content-type", "application/xml; charset=utf-8")
 end
 
