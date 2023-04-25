@@ -16,20 +16,13 @@ function CorrelationIdHandler:access(conf)
 end
 
 function CorrelationIdHandler:body_filter(config)
-  local ctx = ngx.ctx 
-  local response_body =''
-
-  local resp_body = string.sub(ngx.arg[1], 1, 1000)  
-    ctx.buffered = string.sub((ctx.buffered or "") .. resp_body, 1, 1000)
-    -- arg[2] is true if this is the last chunk
-    if ngx.arg[2] then
-      response_body = ctx.buffered
+    local body = kong.response.get_raw_body()
+    local json_body, err = xml2json.test(body)
+    if err then
+      kong.log.warn("body transform failed: " .. err)
+      return
     end
-    local res = xml2json.test(resp_body)
-
-  ngx.arg[1] = res
-  ngx.arg[2] = true
-
+    return kong.response.set_raw_body(json_body)
 end 
 
 function dump(o)
