@@ -17,12 +17,7 @@ end
 function CorrelationIdHandler:access(conf)
   local body = kong.response.get_raw_body()
   local json_body, err = xml2json.test(body)
-  if err then
-    kong.log.warn("body transform failed: " .. err)
-    return
-  end
   kong.response.set_header("Arulkumar", json_body)
-  return kong.response.set_raw_body(json_body)
 end
 
 function dump(o)
