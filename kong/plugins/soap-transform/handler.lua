@@ -11,11 +11,12 @@ function CorrelationIdHandler:init_worker()
 end
 
 function CorrelationIdHandler:body_filter(config)
-  local body = kong.service.response.get_raw_body()
-  kong.response.set_header("Surya", body)
+ 
 end 
 
 function CorrelationIdHandler:access(conf)
+    local body = kong.service.response.get_raw_body()
+    kong.response.set_header("Surya", body)
   --local json_body = xml2json.test(body)
   kong.response.set_header("Arulkumar", "123")
   kong.response.set_header("content-type", "application/xml; charset=utf-8")
