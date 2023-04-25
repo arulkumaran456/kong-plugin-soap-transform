@@ -12,8 +12,6 @@ end
 
 function CorrelationIdHandler:body_filter(config)
   kong.response.set_header("Shivya", config)
-  local body = kong.service.response.get_raw_body()
-  kong.response.set_header("Surya", body)
 end 
 
 function CorrelationIdHandler:access(conf)
