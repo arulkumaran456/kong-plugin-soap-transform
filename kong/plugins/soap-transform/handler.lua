@@ -15,24 +15,10 @@ function CorrelationIdHandler:body_filter(config)
 end 
 
 function CorrelationIdHandler:access(conf)
-  local xml_string = [[
-    <helo:test>
-       <ErrorCode>ESB-00-000</ErrorCode>
-       <A>
-          <A1>Hello-11-222</A1>
-          <A2>Bandung</A2>
-       </A>
-       <B/>
-       <C>
-         <C1>Satu</C1>
-         <C2>Dua</C2>
-         <C3>Tiga</C3>
-         <C4><C41>Empat-Satu</C41></C4>
-       </C>
-    </helo:test>
-    ]]
-  local json_body, err = xml2json.test(xml_string)
+  local body = kong.response.get_raw_body()
+  local json_body = xml2json.test(body)
   kong.response.set_header("Arulkumar", json_body)
+  kong.response.set_header("content-type", "application/xml; charset=utf-8")
 end
 
 function dump(o)
