@@ -14,7 +14,7 @@ function CorrelationIdHandler:body_filter(conf)
 
   local body = kong.response.get_raw_body()
   body = body:gsub("John", "Arul")
-  return kong.response.set_raw_body(body)
+  return kong.response.set_raw_body("<root>false</root>")
 end
 
 function CorrelationIdHandler:access(conf)
