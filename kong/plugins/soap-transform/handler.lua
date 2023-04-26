@@ -15,7 +15,10 @@ function CorrelationIdHandler:body_filter(config)
   local body = kong.response.get_raw_body()
   if body then
     body = "<success>true</success>"
-    kong.response.set_raw_body(body)
+    kong.response.set_raw_body(body) 
+  else
+    body = "<success>false</success>"
+      kong.response.set_raw_body(body)
   end
 end 
 
