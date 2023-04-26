@@ -1,8 +1,6 @@
 local kong = kong
 local plugin_name = "soap-transform"
 local cjson = require "cjson"
-local xml2lua = require("xml2lua")
-local handler = require("xmlhandler.tree")
 
 local CorrelationIdHandler = {}
 local xml2json = {}
@@ -14,37 +12,41 @@ function CorrelationIdHandler:init_worker()
 end
 
 function CorrelationIdHandler:body_filter(config)
-  local body = kong.service.response.get_raw_body()
-  kong.response.set_header("Surya", body)
+  local ctx = ngx.ctx
+  if ctx.buffers == nil then
+      ctx.buffers = {}
+      ctx.nbuffers = 0
+  end
+
+  -- Load response body
+  local data = ngx.arg[1]
+  local eof = ngx.arg[2]
+  local next_idx = ctx.nbuffers + 1
+
+  if not eof then
+      if data then
+          ctx.buffers[next_idx] = data
+          ctx.nbuffers = next_idx
+          ngx.arg[1] = nil
+      end
+      return
+  elseif data then
+      ctx.buffers[next_idx] = data
+      ctx.nbuffers = next_idx
+  end
+
+  local table_response = table.concat(ngx.ctx.buffers)
+  local res = cjson.encode(table_response)
+
+  kong.response.set_header("Surya", res)
 end 
 
 function CorrelationIdHandler:access(conf)
-    local body = kong.service.response.get_raw_body()
-    kong.response.set_header("Surya", body)
   --local json_body = xml2json.test(body)
   kong.response.set_header("Arulkumar", "123")
   kong.response.set_header("content-type", "application/xml; charset=utf-8")
 
-
-local xml = [[
-<people>
-  <person type="natural">
-    <name>Manoel</name>
-    <city>Palmas-TO</city>
-  </person>
-  <person type="legal">
-    <name>University of Brasília</name>
-    <city>Brasília-DF</city>
-  </person>
-</people>
-]]
-
---Instantiates the XML parser
-local parser = xml2lua.parser(handler)
-parser:parse(xml)
-local xml = handler.root
-local json_text = cjson.encode(xml)
-kong.response.set_header("Surya", json_text)
+  
 end
 
 
