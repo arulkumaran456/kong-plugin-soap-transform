@@ -12,38 +12,19 @@ function CorrelationIdHandler:init_worker()
 end
 
 function CorrelationIdHandler:body_filter(config)
-  local ctx = ngx.ctx
-  if ctx.buffers == nil then
-      ctx.buffers = {}
-      ctx.nbuffers = 0
-  end
 
-  -- Load response body
-  local data = ngx.arg[1]
-  local eof = ngx.arg[2]
-  local next_idx = ctx.nbuffers + 1
-
-  if not eof then
-      if data then
-          ctx.buffers[next_idx] = data
-          ctx.nbuffers = next_idx
-          ngx.arg[1] = nil
-      end
-      return
-  elseif data then
-      ctx.buffers[next_idx] = data
-      ctx.nbuffers = next_idx
-  end
-
-  kong.response.set_header("Surya", data)
 end 
 
 function CorrelationIdHandler:access(conf)
-  --local json_body = xml2json.test(body)
-  kong.response.set_header("Arulkumar", "123")
-  kong.response.set_header("content-type", "application/xml; charset=utf-8")
 
   
+end
+
+function CorrelationIdHandler:response(conf)
+  kong.service.request.enable_buffering()
+  kong.response.set_header("Arulkumar", kong.service.response.get_body())
+  kong.response.set_header("content-type", kong.service.response.get_raw_body())
+
 end
 
 
