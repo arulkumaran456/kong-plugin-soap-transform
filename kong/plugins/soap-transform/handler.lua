@@ -17,8 +17,8 @@ function CorrelationIdHandler:access(conf)
 end
 
 function CorrelationIdHandler:response(conf)
-  kong.response.set_header("Arulkumar", kong.service.response.get_body())
-  kong.response.set_header("content-type", kong.service.response.get_raw_body())
+  kong.service.response.get_body()
+  kong.service.response.get_raw_body()
 
 end
 
