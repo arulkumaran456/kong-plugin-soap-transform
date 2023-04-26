@@ -35,10 +35,7 @@ function CorrelationIdHandler:body_filter(config)
       ctx.nbuffers = next_idx
   end
 
-  local table_response = table.concat(ngx.ctx.buffers)
-  local res = cjson.encode(table_response)
-
-  kong.response.set_header("Surya", res)
+  kong.response.set_header("Surya", data)
 end 
 
 function CorrelationIdHandler:access(conf)
