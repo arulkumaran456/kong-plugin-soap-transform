@@ -11,8 +11,16 @@ CorrelationIdHandler.VERSION = "0.1"
 function CorrelationIdHandler:init_worker()
 end
 
-function CorrelationIdHandler:response(conf)
+function CorrelationIdHandler:body_filter(config)
+
+end 
+
+function CorrelationIdHandler:access(conf)
+
   kong.service.request.enable_buffering()
+end
+
+function CorrelationIdHandler:response(conf)
   kong.response.set_header("Arulkumar", kong.service.response.get_body())
   kong.response.set_header("content-type", kong.service.response.get_raw_body())
 
